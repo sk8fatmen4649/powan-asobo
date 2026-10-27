@@ -1,0 +1,12 @@
+{
+  "name": "ぽわんとあそぼ",
+  "short_name": "ぽわん",
+  "description": "0〜3さいの タッチあそび",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#e9e3ff",
+  "theme_color": "#cdbfff",
+  "lang": "ja",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
