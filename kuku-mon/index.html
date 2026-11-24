@@ -350,6 +350,8 @@ button:focus-visible{outline:4px solid #4ea8ff;outline-offset:2px}
 .crack{display:none}.bsvg[data-egg="1"] .crack{display:inline;transition:stroke-dashoffset .5s}
 .bsvg[data-egg="1"] .petImg{filter:drop-shadow(0 0 calc(var(--g,0) * 9px) #ffe27a) drop-shadow(0 0 calc(var(--g,0) * 4px) #fff)}
 .eggSing.sm{top:15%;font-size:16px;padding:8px 16px;animation:none;max-width:92%}
+.power .petImg{animation:powA 1s ease}
+@keyframes powA{30%{filter:drop-shadow(0 0 18px #ffd23f) drop-shadow(0 0 6px #fff) brightness(1.15)}100%{filter:none}}
 .eggSing small{font:800 12px "M PLUS Rounded 1c";opacity:.95;margin-top:2px}
 .eggSing.on{animation:none;background:linear-gradient(#ffd36e,#ff9f43);box-shadow:0 6px 0 #d0761c}
 .evoPill .eb{width:54px;height:10px;border-radius:5px;background:#f0e3ea;overflow:hidden;flex:none}.evoPill .eb i{display:block;height:100%;background:linear-gradient(90deg,#ffd23f,#ff9f43)}
@@ -381,7 +383,7 @@ button:focus-visible{outline:4px solid #4ea8ff;outline-offset:2px}
     <div id="baby" role="button" aria-label="なでなで"></div>
     <button class="think off" id="think" aria-label="ほしいもの"></button>
     <div class="say" id="say"></div>
-    <div class="rside"><button class="rbtn" id="singBtn" aria-label="うたう" hidden>🎤<small>うたう</small></button><button class="rbtn" id="toiletBtn" aria-label="トイレ">🚽<small>トイレ</small></button><button class="rbtn" id="zukanBtn" aria-label="ずかん">📖<small>ずかん</small></button><button class="rbtn gift" id="giftBtn" hidden aria-label="プレゼント">🎁</button></div>
+    <div class="rside"><button class="rbtn" id="toiletBtn" aria-label="トイレ">🚽<small>トイレ</small></button><button class="rbtn" id="zukanBtn" aria-label="ずかん">📖<small>ずかん</small></button><button class="rbtn gift" id="giftBtn" hidden aria-label="プレゼント">🎁</button></div>
     <button class="visitor" id="visitor" hidden aria-label="おともだち"></button>
     <button class="goalPill" id="goalPill" hidden aria-label="ゆめ"></button>
     <div class="tfFx" id="tfFx"></div><div class="sickI" id="sickI" hidden>🤒</div><button class="eggSing" id="eggSing" hidden>🎤 いっしょに うたおう！<small>うたを きかせると たまごが うまれるよ</small></button><button class="evoPill" id="evoPill" hidden aria-label="しんかまで"></button><div class="flushW" id="flushW"></div>
@@ -390,7 +392,7 @@ button:focus-visible{outline:4px solid #4ea8ff;outline-offset:2px}
   <section class="tray"><div class="trayLbl">もちもの</div><div class="slots" id="slots"></div></section>
   <nav class="acts">
     <button class="big go" id="goWork"><span class="ai"><i class="coin"></i></span>九九で かせぐ</button>
-    <button class="big vio" id="goSong"><span class="ai">♪</span>うたで かせぐ</button>
+    <button class="big vio" id="goSong"><span class="ai">🎤</span><span id="goSongT">いっしょに うたう</span></button>
     <button class="big" id="goShop"><span class="ai"><svg viewBox="0 0 32 32"><path d="M5 13h22v15H5z" fill="#fff"/><path d="M3 5h26l-1 8H4z" fill="#fff"/><path d="M8 5h5l-1 8H7zM19 5h5l2 8h-5z" fill="#ff5d8f" opacity=".55"/><rect x="13" y="18" width="7" height="10" rx="1.5" fill="#ff8db1"/></svg></span>おみせ</button>
   </nav>
 </div>
@@ -870,7 +872,7 @@ function press(k){ctx();if(k==="del"){G.input=G.input.slice(0,-1);sfx.tap()}else
 $("hintBtn").onclick=()=>{if(!G||G.lock)return;sfx.tap();const hb=$("hintbox");if(hb.innerHTML){hb.innerHTML="";return}
  const{a,b,ana}=G.cur,col=DC[a];hb.style.setProperty("--ds",a*b>40?"9px":a*b>20?"12px":"15px");hb.innerHTML=(ana?`<div class="yomi" style="width:100%">${a}こずつ いくつ ぶん？</div>`:"")+Array.from({length:b},()=>`<div class="grp">${`<i style="background:${col}"></i>`.repeat(a)}</div>`).join("")}
 function check(){if(!G)return;const{a,b,ana,retry}=G.cur,ans=ana?b:a*b,ok=+G.input===ans,key=a+"x"+b;G.lock=true;if(aMode==="snip")stopAudio();if(G.kind&&G.kind!=="normal"){checkX(ok,ans,key);return}if(ok&&!G.cur.tries)S.fx[key]=(S.fx[key]||0)+1;const hasSong=songOK&&TT()[key]!=null;$("hintbox").innerHTML="";$("yomi").textContent=Y[a][b-1];
- if(ok){drawEq("ok");G.done++;G.combo++;sfx.poan();const bx=$("box");burst(...ctr(bx));if(S.miss[key])S.miss[key]--;gainExp(G.cur.tries?1:2);
+ if(ok){drawEq("ok");G.done++;G.combo++;sfx.poan();const bx=$("box");burst(...ctr(bx));if(S.miss[key])S.miss[key]--;
   const pay=G.cur.tries?Math.ceil(PAY[a]/2):PAY[a];{S.coins+=pay;G.earned+=pay;save();coinFly(bx,$("wWallet"),()=>{showCoins();bumpW();sfx.coin()})}
   $("msg").textContent=["せいかい！","すごい！","やったね！","かんぺき！"][Math.random()*4|0];$("msg").style.color="#11a06c";
   face($("mini"),"joy","big");$("cheer").textContent=G.combo>=3?`${G.combo}もん れんぞく！すごーい！`:["やったー！","ありがとう！","さすが〜！"][Math.random()*3|0];
@@ -910,7 +912,7 @@ $("sBack").onclick=()=>{sfx.tap();closeOv();if(Object.values(S.wear).some(Boolea
 $("shopWork").onclick=()=>{sfx.tap();$("shopWork").classList.remove("pulse");$("sBack").onclick()};
 $("goWork").onclick=()=>{sfx.tap();openWork()};
 $("goShop").onclick=()=>{sfx.tap();openShop()};
-$("goSong").onclick=()=>{sfx.tap();openSong()};
+$("goSong").onclick=()=>{sfx.tap();eggSing()};
 $("think").onclick=()=>{const ni=needInfo();if(!ni||busy)return;sfx.tap();if(ni.step==="toilet"){doToilet();return}if(ni.step==="use"){const s=document.querySelector(`.slot[data-id="${ni.own[0]}"]`);if(s)tapUse(ni.own[0],s)}else if(ni.step==="light")toggleLight();else if(ni.step==="shop")openShop();else openWork()};
 
 /* ========== せってい ========== */
@@ -977,7 +979,7 @@ function listenTick(){const t=AU.currentTime;if(L.seekTo!=null){if(Math.abs(t-L.
  if(d>0&&d<1.5){L.heard+=d;for(const[k,x]of Object.entries(TT())){const v=Array.isArray(x)?x[0]:x;if(v>L.last&&v<=t&&!L.got.has(k)){L.got.add(k);if(L.egg)eggLine(k);else{showLyric(k);earnSong(1)}}}}
  L.last=t;$("lBar").style.width=(AU.duration?t/AU.duration*100:0)+"%"}
 function showLyric(k){const[a,b]=k.split("x").map(Number),l=$("lyric");l.innerHTML=`<b style="color:${DC[a]}">${a} × ${b} = ${a*b}</b><small>${Y[a][b-1]}</small>`;l.classList.remove("hit");void l.offsetWidth;l.classList.add("hit")}
-function earnSong(n){if(songLeft()<=0)return;n=Math.min(n,songLeft());S.songDay.c+=n;S.coins+=n;gainExp(n,true);save();coinFly($("lyric"),$("lWallet"),()=>{showCoins();bumpW();sfx.coin()});drawListen()}
+function earnSong(n){if(songLeft()<=0)return;n=Math.min(n,songLeft());S.songDay.c+=n;gainExp(n,true);save();coinFly($("lyric"),$("lWallet"),()=>{showCoins();bumpW();sfx.coin()});drawListen()}
 AU.addEventListener("ended",()=>{if(aMode==="listen"&&L){if(AU.duration&&L.heard>AU.duration*.85&&songLeft()>0){earnSong(Object.keys(TT()).length?20:30);confetti();sfx.fan();say("うた じょうず！",1600)}aMode=null;drawListen()}});
 $("lBack").onclick=()=>{sfx.tap();closeOv()};
 
@@ -1082,7 +1084,7 @@ function hitFx(dmg){const f=$("foe"),[x1,y1]=ctr($("mini2")),[x2,y2]=ctr(f);cons
  setTimeout(()=>{sfx.hit();f.classList.remove("hit");void f.offsetWidth;f.classList.add("hit");burst(x2,y2,12);part(x2-10,y2-50,`-${dmg}`,'font:400 32px "Mochiy Pop One";color:#ff3d6e;text-shadow:0 2px 0 #fff',[{transform:"translateY(0)",opacity:1},{transform:"translateY(-50px)",opacity:0}],800);drawArena()},380)}
 function checkX(ok,ans,key){const{a,b}=G.cur;
  if(ok){drawEq("ok");G.combo++;G.done++;sfx.poan();S.fx[key]=(S.fx[key]||0)+1;if(S.miss[key])S.miss[key]--;
-  if(G.kind==="time"||G.kind==="gym"){G.count++;if(G.kind==="gym"){G.exp=(G.exp||0)+4;gainExp(4)}else{G.earned+=3;S.coins+=3;gainExp(1)}save();showCoins();$("cheer").textContent=`${G.count}もん！ ${G.combo>=3?G.combo+"れんぞく！":""}`;face($("mini"),"joy","big");setTimeout(()=>{if(G&&!G.ended)nextX()},380);return}
+  if(G.kind==="time"||G.kind==="gym"){G.count++;if(G.kind==="gym"){G.exp=(G.exp||0)+4;gainExp(4)}else{G.earned+=3;S.coins+=3}save();showCoins();$("cheer").textContent=`${G.count}もん！ ${G.combo>=3?G.combo+"れんぞく！":""}`;face($("mini"),"joy","big");setTimeout(()=>{if(G&&!G.ended)nextX()},380);return}
   let dmg=ATK()*(G.power>0?2:1);if(G.power>0)G.power--;G.hp-=dmg;face($("mini2"),"joy","big");anim($("mini2"),"jump");hitFx(dmg);save();
   $("msg").textContent=dmg>1?`${dmg}ダメージ！ すごい！`:"こうげき！";$("msg").style.color="#11a06c";
   setTimeout(()=>{if(!G)return;if(G.hp<=0){G.lock=true;$("foe").classList.add("down");sfx.fan();setTimeout(()=>endX(true),1100)}else nextX()},1000);return}
@@ -1152,7 +1154,7 @@ $("mzBack").onclick=()=>{sfx.tap();openZukan()};
 function openSt(){const q=reqState(),age=S.born&&S.stage?Math.floor((Date.now()-S.born)/864e5):0,fmt=m=>m>=60?Math.floor(m/60)+"じかん"+(m%60>=1?Math.floor(m%60)+"ふん":""):Math.max(1,Math.ceil(m))+"ふん";
  let h=`<div class="row"><span>なまえ</span><span>${nm()}</span></div><div class="row"><span>すがた</span><span>${formName()}（${STG[S.stage]}）</span></div><div class="row"><span>うまれてから</span><span>${age}にち</span></div><div class="row"><span>${S.gen||1}だいめ</span><span>おせわミス ${S.cm||0}かい</span></div><div class="row"><span>こうげき・ハート</span><span>${ATK()}・${LIV()}</span></div><div class="row"><span>ジムで とっくん</span><span>${S.gym||0}かい</span></div>`;
  if(S.stage===0)h+=`<p style="font-weight:800">おへやの「いっしょに うたおう」で うたを 5ぎょう きかせると うまれるよ（いま ${Math.min(S.warm||0,5)}/5）</p>`;
- else if(q){h+=`<h3 style="margin:10px 0 4px">つぎの しんかまで</h3><div class="ck ${q.exp[2]?"ok":""}"><i>${q.exp[2]?"✅":"⭐"}</i>けいけんち ${Math.min(q.exp[0],q.exp[1])} / ${q.exp[1]}</div><div class="ck ${q.min[2]?"ok":""}"><i>${q.min[2]?"✅":"⏰"}</i>${q.min[2]?"そだてた じかん OK":"あと "+fmt(q.min[1]-q.min[0])+" いっしょに すごす"}</div>`+(q.gems?`<div class="ck ${q.gems[2]?"ok":""}"><i>${q.gems[2]?"✅":"💎"}</i>マスターした だん ${q.gems[0]} / ${q.gems[1]}</div>`:"")+(S.sick?`<div class="ck"><i>💊</i>びょうきを なおそう</div>`:"")+(S.stage===3?`<p style="font-size:13px;color:var(--soft)">この じきに うんちを ほうっておくと…？</p>`:"")+`<p style="font-size:13px;color:var(--soft)">けいけんちは 九九で かせぐ・うたで かせぐ・ジム・ボスせんで たまるよ。⏰は しんかに ひつような じかん（その すがたで すごす じかん）だよ</p>`}
+ else if(q){h+=`<h3 style="margin:10px 0 4px">つぎの しんかまで</h3><div class="ck ${q.exp[2]?"ok":""}"><i>${q.exp[2]?"✅":"⭐"}</i>けいけんち ${Math.min(q.exp[0],q.exp[1])} / ${q.exp[1]}</div><div class="ck ${q.min[2]?"ok":""}"><i>${q.min[2]?"✅":"⏰"}</i>${q.min[2]?"そだてた じかん OK":"あと "+fmt(q.min[1]-q.min[0])+" いっしょに すごす"}</div>`+(q.gems?`<div class="ck ${q.gems[2]?"ok":""}"><i>${q.gems[2]?"✅":"💎"}</i>マスターした だん ${q.gems[0]} / ${q.gems[1]}</div>`:"")+(S.sick?`<div class="ck"><i>💊</i>びょうきを なおそう</div>`:"")+(S.stage===3?`<p style="font-size:13px;color:var(--soft)">この じきに うんちを ほうっておくと…？</p>`:"")+`<p style="font-size:13px;color:var(--soft)">けいけんちは いっしょに うたう・ジム・ボスせんで たまるよ。⏰は しんかに ひつような じかん（その すがたで すごす じかん）だよ</p>`}
  else h+=`<p style="font-weight:800">もう さいごの すがただよ！</p><button class="big go" id="newEgg">たびだち（あたらしい たまご）</button>`;
  $("stBody").innerHTML=h;openOv("stOv");const ne=$("newEgg");if(ne)ne.onclick=()=>{sfx.fan();S.gen=(S.gen||1)+1;save();openPick()}}
 $("stBack").onclick=()=>{sfx.tap();closeOv()};
@@ -1177,13 +1179,14 @@ function eggLine(k){const[a,b]=k.split("x").map(Number);
  if(a!==L.dan){return}
  if(b===9){const nd=rndDan(a);setTimeout(()=>{if(aMode==="listen"&&L&&L.egg&&!AU.paused){singDan(nd);toast(`♪ つぎは ${nd}のだん！`)}},1900)}
  if(S.stage>0){L.ate++;L.lyr=`${a}×${b}=${a*b}　${Y[a][b-1]}`;drawEggSing();
-  shootEq(a,b,()=>{sfx.eat();anim(BABY,"jump");reactF("joy","big",900);S.n.food=Math.min(100,S.n.food+3);S.n.joy=Math.min(100,S.n.joy+1);S.n.toilet=Math.max(8,S.n.toilet-1);gainExp(1);save();drawNeeds();
-   const[mx,my]=ctr(BABY.querySelector(".zMouth"));part(mx-20,my-50,'<span style="font:400 22px &quot;Mochiy Pop One&quot;;color:#ff9f43;-webkit-text-stroke:1px #fff;paint-order:stroke">もぐもぐ</span>',"",[{transform:"translateY(0)",opacity:1},{transform:"translateY(-40px)",opacity:0}],900)},".zMouth");return}
+  shootEq(a,b,()=>{anim(BABY,"jump");reactF("joy","big",900);BABY.classList.remove("power");void BABY.offsetWidth;BABY.classList.add("power");gainExp(1);save();
+   const[mx,my]=ctr(BABY.querySelector(".zHead"));part(mx-60,my-30,'<span style="font:400 22px &quot;Mochiy Pop One&quot;;color:#ff7a2e;-webkit-text-stroke:1px #fff;paint-order:stroke;white-space:nowrap">つよく なった！</span>',"",[{transform:"translateY(0) scale(.7)",opacity:0},{transform:"translateY(-20px) scale(1.1)",opacity:1,offset:.3},{transform:"translateY(-60px) scale(1)",opacity:0}],1100);
+   for(let i=0;i<8;i++)setTimeout(()=>sparkle(mx+Math.random()*200-100,my+Math.random()*200-60),i*50)});return}
  S.warm=(S.warm||0)+1;save();shootEq(a,b,()=>{anim(BABY,"shake");look(BABY)});L.lyr=`${a}×${b}=${a*b}　${Y[a][b-1]}`;hearts(...ctr(BABY.querySelector(".zBody")),2,"♪","#8e5cff");drawStage();drawEggSing();
  if(S.warm>=5){setTimeout(()=>{stopAudio();bgmDuck=1;L=null;drawEggSing();hatch()},1600)}}
-function drawEggSing(){const b=$("eggSing"),on=aMode==="listen"&&L&&L.egg&&!AU.paused,hatched=S.stage>0;b.hidden=!S.sp||S.asleep||(hatched&&!on);b.classList.toggle("on",!!on);b.classList.toggle("sm",hatched);$("singBtn").hidden=!S.sp||!hatched||S.asleep||!!on;
- const h=on?`♪ ${L.lyr||"うたってるよ…"}<small>${hatched?`たべた かけざん ${L.ate}こ`:`${Math.min(S.warm||0,5)}/5`}　タップで とめる</small>`:`🎤 いっしょに うたおう！<small>うたを きかせると たまごが うまれるよ（${Math.min(S.warm||0,5)}/5）</small>`;if(b.dataset.h!==h){b.innerHTML=h;b.dataset.h=h}}
-$("eggSing").onclick=eggSing;$("singBtn").onclick=eggSing;
+function drawEggSing(){const b=$("eggSing"),on=aMode==="listen"&&L&&L.egg&&!AU.paused,hatched=S.stage>0;b.hidden=!S.sp||S.asleep||(hatched&&!on);b.classList.toggle("on",!!on);b.classList.toggle("sm",hatched);const gt=$("goSongT");if(gt)gt.textContent=on?"とめる":"いっしょに うたう";
+ const h=on?`♪ ${L.lyr||"うたってるよ…"}<small>${hatched?`うけとめた かけざん ${L.ate}こ`:`${Math.min(S.warm||0,5)}/5`}　タップで とめる</small>`:`🎤 いっしょに うたおう！<small>うたを きかせると たまごが うまれるよ（${Math.min(S.warm||0,5)}/5）</small>`;if(b.dataset.h!==h){b.innerHTML=h;b.dataset.h=h}}
+$("eggSing").onclick=eggSing;
 AU.addEventListener("pause",()=>{if(L&&L.egg){bgmDuck=1;drawEggSing()}});
 
 /* ========== ループ ========== */
