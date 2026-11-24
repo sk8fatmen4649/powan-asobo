@@ -345,6 +345,15 @@ button:focus-visible{outline:4px solid #4ea8ff;outline-offset:2px}
 #evo p{font-weight:800;margin:4px 0 16px;min-height:1.4em;position:relative;z-index:1}
 #evo .ray{position:absolute;inset:-40%;background:repeating-conic-gradient(rgba(255,230,140,.18) 0 10deg,transparent 10deg 20deg);animation:rot 8s linear infinite;opacity:0;pointer-events:none}
 #evo.reveal .ray{opacity:1}
+.evoPill{position:absolute;left:10px;top:10px;z-index:3;border:0;background:rgba(255,255,255,.94);border-radius:999px;padding:5px 12px 5px 8px;display:flex;align-items:center;gap:6px;box-shadow:0 3px 0 rgba(0,0,0,.15);font-weight:800;font-size:12px;line-height:1.35;color:var(--ink);max-width:56%;flex-wrap:wrap;row-gap:0;text-align:left}
+.evoPill .eb{width:54px;height:10px;border-radius:5px;background:#f0e3ea;overflow:hidden;flex:none}.evoPill .eb i{display:block;height:100%;background:linear-gradient(90deg,#ffd23f,#ff9f43)}
+.evoPill.ready{animation:pulse 1s infinite;background:#fff3c4}
+.room.night .lightBtn{top:56px}
+.flush .act{animation:flushA 2.6s ease-in-out}
+@keyframes flushA{0%{transform:none}12%{transform:translateY(-3%)}22%{transform:translateY(0)}48%{transform:translateX(-150%) rotate(-35deg);opacity:1}49%{transform:translateX(-150%);opacity:0}50%{transform:translateX(150%);opacity:0}52%{opacity:1}80%{transform:translateX(0) rotate(8deg)}90%{transform:translateY(-3%)}100%{transform:none}}
+.flushW{position:absolute;left:0;right:0;bottom:0;height:46%;z-index:2;pointer-events:none;transform:translateX(110%);background:radial-gradient(ellipse 30px 14px at 20% 6%,rgba(255,255,255,.9) 60%,transparent 62%),radial-gradient(ellipse 22px 10px at 55% 4%,rgba(255,255,255,.85) 60%,transparent 62%),radial-gradient(ellipse 26px 12px at 85% 7%,rgba(255,255,255,.9) 60%,transparent 62%),linear-gradient(180deg,rgba(150,215,255,.0) 0%,rgba(120,200,255,.85) 12%,rgba(70,160,240,.9) 100%);border-radius:40% 40% 0 0/18% 18% 0 0}
+.flushW.on{animation:waveA 2.6s ease-in-out}
+@keyframes waveA{0%,12%{transform:translateX(110%)}45%{transform:translateX(-10%)}60%{transform:translateX(-115%)}100%{transform:translateX(-115%)}}
 #evoOk{display:none;width:70%;position:relative;z-index:2}#evo.reveal #evoOk{display:flex}
 </style>
 </head>
@@ -369,7 +378,7 @@ button:focus-visible{outline:4px solid #4ea8ff;outline-offset:2px}
     <div class="rside"><button class="rbtn" id="toiletBtn" aria-label="トイレ">🚽<small>トイレ</small></button><button class="rbtn" id="zukanBtn" aria-label="ずかん">📖<small>ずかん</small></button><button class="rbtn gift" id="giftBtn" hidden aria-label="プレゼント">🎁</button></div>
     <button class="visitor" id="visitor" hidden aria-label="おともだち"></button>
     <button class="goalPill" id="goalPill" hidden aria-label="ゆめ"></button>
-    <div class="tfFx" id="tfFx"></div><div class="sickI" id="sickI" hidden>🤒</div>
+    <div class="tfFx" id="tfFx"></div><div class="sickI" id="sickI" hidden>🤒</div><button class="evoPill" id="evoPill" hidden aria-label="しんかまで"></button><div class="flushW" id="flushW"></div>
     <div class="toast" id="toast"></div>
   </main>
   <section class="tray"><div class="trayLbl">もちもの</div><div class="slots" id="slots"></div></section>
@@ -633,7 +642,7 @@ function look(root){const sv=root.querySelector(".bsvg");if(!sv)return;const b=p
  sv.dataset.sick=S.sick?"1":"0";sv.dataset.egg=S.stage===0?"1":"0";
  sv.querySelectorAll(".furn").forEach(f=>f.style.display=S.own[f.dataset.f]?"inline":"none")}
 function face(root,e,m){const sv=root.querySelector(".bsvg");if(!sv)return;const k=e==="sleep"||e==="sleepy"?"sleep":e==="cry"?"cry":e==="sad"?"sad":e==="joy"?"joy":"norm";if(sv.dataset.face!==k)sv.dataset.face=k}
-function anim(el,c){el.classList.remove("jump","spin","shake","tfspin","dance");void el.offsetWidth;el.classList.add(c)}
+function anim(el,c){el.classList.remove("jump","spin","shake","tfspin","dance","flush");void el.offsetWidth;el.classList.add(c)}
 $("baby").innerHTML=babySVG("a","40 200 860 1330",true);$("mini").innerHTML=babySVG("b");$("shopBaby").innerHTML=babySVG("c");$("resBaby").innerHTML=babySVG("d");$("nameBaby").innerHTML=babySVG("e");$("mini2").innerHTML=babySVG("f");
 const BABY=$("baby");
 
@@ -961,7 +970,7 @@ function listenTick(){const t=AU.currentTime,d=t-L.last;
  if(d>0&&d<1.5){L.heard+=d;for(const[k,x]of Object.entries(TT())){const v=Array.isArray(x)?x[0]:x;if(v>L.last&&v<=t&&!L.got.has(k)){L.got.add(k);showLyric(k);earnSong(1)}}}
  L.last=t;$("lBar").style.width=(AU.duration?t/AU.duration*100:0)+"%"}
 function showLyric(k){const[a,b]=k.split("x").map(Number),l=$("lyric");l.innerHTML=`<b style="color:${DC[a]}">${a} × ${b} = ${a*b}</b><small>${Y[a][b-1]}</small>`;l.classList.remove("hit");void l.offsetWidth;l.classList.add("hit")}
-function earnSong(n){if(songLeft()<=0)return;n=Math.min(n,songLeft());S.songDay.c+=n;S.coins+=n;save();coinFly($("lyric"),$("lWallet"),()=>{showCoins();bumpW();sfx.coin()});drawListen()}
+function earnSong(n){if(songLeft()<=0)return;n=Math.min(n,songLeft());S.songDay.c+=n;S.coins+=n;gainExp(n,true);save();coinFly($("lyric"),$("lWallet"),()=>{showCoins();bumpW();sfx.coin()});drawListen()}
 AU.addEventListener("ended",()=>{if(aMode==="listen"&&L){if(AU.duration&&L.heard>AU.duration*.85&&songLeft()>0){earnSong(Object.keys(TT()).length?20:30);confetti();sfx.fan();say("うた じょうず！",1600)}aMode=null;drawListen()}});
 $("lBack").onclick=()=>{sfx.tap();closeOv()};
 
@@ -1096,19 +1105,26 @@ function decay(sec,off){if(!S.sp||S.stage===0||S.asleep)return;const m=SPD[S.sta
  if(S.poop>=3&&!S.sick){S.sickT=(S.sickT||0)+sec;if(S.sickT>=1800){S.sick=true;S.sickT=0;if(!off){say("ぐあいが わるい…",2400);sfx.boo()}}}
  if(!off&&!document.hidden&&S.poop>=2&&S.stage===3){S.unkoT=(S.unkoT||0)+sec;if(S.unkoT>=180){S.unkoT=0;S.unko=(S.unko||0)+1}}
  if(S.n.food<=0||S.n.joy<=0||S.sick){const b=S.cmT||0;S.cmT=b+sec;if(b<1800&&S.cmT>=1800)S.cm=(S.cm||0)+1}else S.cmT=0}
-function gainExp(n){if(!S.sp)return;if(S.stage===0){S.warm=(S.warm||0)+1;return}S.expAll=(S.expAll||0)+n;if(!isFinal())S.exp=(S.exp||0)+n}
+function gainExp(n,nw){if(!S.sp)return;if(S.stage===0){if(!nw)S.warm=(S.warm||0)+1;return}S.expAll=(S.expAll||0)+n;if(!isFinal())S.exp=(S.exp||0)+n}
 function sweep(){if(!S.poop){say("ぴかぴか だよ！");return}
  BABY.querySelectorAll(".poops>g").forEach(p=>{const[x,y]=ctr(p);for(let i=0;i<6;i++)setTimeout(()=>sparkle(x+Math.random()*50-25,y+Math.random()*30-15),i*60)});sfx.comb();setTimeout(()=>sfx.comb(),160);setTimeout(()=>sfx.comb(),320);
  S.poop=0;S.sickT=0;S.unkoT=0;S.broomDur=(S.broomDur||10)-1;let broke=false;if(S.broomDur<=0){S.inv.broom=Math.max(0,(S.inv.broom||0)-1);S.broomDur=10;broke=true}
  S.n.joy=Math.min(100,S.n.joy+8);save();setTimeout(()=>{look(BABY);drawTray()},350);reactF("joy","big",1500);anim(BABY,"jump");say(broke?"ほうきが こわれちゃった！":"すっきり〜！");toast(broke?"🧹 ほうきが こわれた！（10かい つかったよ）":`🧹 ほうき あと ${S.broomDur}かい`);addBond(2)}
 function giveMed(){if(!S.sick){say("げんき だよ！");return}S.inv.med=Math.max(0,(S.inv.med||0)-1);S.sick=false;S.sickT=0;S.n.joy=Math.min(100,S.n.joy+15);save();drawTray();sfx.joy();reactF("joy","big",2000);anim(BABY,"jump");say("げんきに なった！ ありがとう！");hearts(...ctr(BABY.querySelector(".zHead")),4);addBond(2)}
 function doToilet(){ctx();if(!S.sp||S.stage===0||busy)return;if(S.asleep){say("すやすや…",1200);return}if(S.n.toilet>75){say("いまは でないよ〜");anim(BABY,"shake");return}
- busy=true;sfx.tap();const[x,y]=ctr(BABY.querySelector(".zBody"));part(x-45,y-50,'<span style="font-size:90px">🚽</span>',"",[{transform:"scale(.3)",opacity:0},{transform:"scale(1)",opacity:1,offset:.2},{transform:"scale(1)",opacity:1,offset:.8},{transform:"scale(.3)",opacity:0}],1700);
- setTimeout(()=>{hiss(.9,900,.12);tone(520,200,.7,"sine",.08)},800);
- setTimeout(()=>{busy=false;S.n.toilet=100;S.n.joy=Math.min(100,S.n.joy+5);gainExp(1);save();drawNeeds();reactF("joy","big",1800);anim(BABY,"jump");say("すっきり！ トイレで できたね！");addBond(2)},1600)}
+ busy=true;sfx.tap();const[x,y]=ctr(BABY.querySelector(".zBody"));part(x-45,y-60,'<span style="font-size:90px">🚽</span>',"",[{transform:"scale(.3)",opacity:0},{transform:"scale(1)",opacity:1,offset:.3},{transform:"scale(1)",opacity:1,offset:.7},{transform:"scale(.3)",opacity:0}],800);
+ setTimeout(()=>{anim(BABY,"flush");const w=$("flushW");w.classList.remove("on");void w.offsetWidth;w.classList.add("on");hiss(1.6,700,.16);hiss(1.2,1600,.08,.3);for(let i=0;i<5;i++)tone(300+i*40,180,.25,"sine",.06,.2+i*.18)},700);
+ setTimeout(()=>{petCry();say("ざぶーん！",1200)},1500);
+ setTimeout(()=>{busy=false;$("flushW").classList.remove("on");BABY.classList.remove("flush");S.n.toilet=100;S.n.joy=Math.min(100,S.n.joy+5);gainExp(1);save();drawNeeds();reactF("joy","big",1800);anim(BABY,"jump");say("すっきり！ トイレで できたね！");addBond(2)},3400)}
 function drawStage(){const t=$("stTile");if(!t)return;const r=REQ[S.stage],p=S.stage===0?Math.min(1,(S.warm||0)/5):r&&!isFinal()?Math.min(1,S.exp/r.exp):1;
  const h=`<span class="ni">${S.stage===0?"🥚":isFinal()?"👑":"⭐"}</span><div class="stx"><b>${S.stage===0?"たまご "+Math.min(S.warm||0,5)+"/5":STG[S.stage]}</b><div class="nb"><i style="width:${p*100}%;background:#ffbf3c"></i></div></div>`;if(t.dataset.h!==h){t.innerHTML=h;t.dataset.h=h}
- $("sickI").hidden=!S.sick||S.stage===0;$("toiletBtn").hidden=!S.sp||S.stage===0}
+ $("sickI").hidden=!S.sick||S.stage===0;
+ const ep=$("evoPill");let eh="",rd=false;
+ if(!S.sp||isFinal())ep.hidden=true;else{ep.hidden=false;
+  if(S.stage===0)eh=`🥚 九九で あたためよう <span class="eb"><i style="width:${p*100}%"></i></span>${Math.min(S.warm||0,5)}/5`;
+  else{const q=reqState();rd=canEvo();eh=rd?"✨ もうすぐ しんか！":`⭐ しんかまで <span class="eb"><i style="width:${p*100}%"></i></span>${Math.min(q.exp[0],q.exp[1])}/${q.exp[1]}`+(q.min[2]?"":` ⏰${fmtM(q.min[1]-q.min[0])}`)+(q.gems&&!q.gems[2]?` 💎${q.gems[0]}/${q.gems[1]}`:"")}
+  if(ep.dataset.h!==eh){ep.innerHTML=eh;ep.dataset.h=eh}ep.classList.toggle("ready",rd)}$("toiletBtn").hidden=!S.sp||S.stage===0}
+const fmtM=m=>m>=60?Math.floor(m/60)+"じかん"+(m%60>=1?Math.floor(m%60)+"ふん":""):Math.max(1,Math.ceil(m))+"ふん";
 function reqState(){const r=REQ[S.stage];if(!r||isFinal())return null;const mins=(Date.now()-S.evoT)/60000;return{exp:[S.exp,r.exp,S.exp>=r.exp],min:[mins,r.min,FAST||mins>=r.min],gems:r.gems?[gemN(),r.gems,gemN()>=r.gems]:null}}
 function canEvo(){const q=reqState();return!!q&&q.exp[2]&&q.min[2]&&(!q.gems||q.gems[2])}
 function evoCheck(){if(!S.sp||busy||drag||S.asleep||S.sick||document.querySelector(".ov.on"))return;if(S.stage===0){if((S.warm||0)>=5)hatch();return}if(canEvo())evolve()}
@@ -1129,11 +1145,11 @@ $("mzBack").onclick=()=>{sfx.tap();openZukan()};
 function openSt(){const q=reqState(),age=S.born&&S.stage?Math.floor((Date.now()-S.born)/864e5):0,fmt=m=>m>=60?Math.floor(m/60)+"じかん"+(m%60>=1?Math.floor(m%60)+"ふん":""):Math.max(1,Math.ceil(m))+"ふん";
  let h=`<div class="row"><span>なまえ</span><span>${nm()}</span></div><div class="row"><span>すがた</span><span>${formName()}（${STG[S.stage]}）</span></div><div class="row"><span>うまれてから</span><span>${age}にち</span></div><div class="row"><span>${S.gen||1}だいめ</span><span>おせわミス ${S.cm||0}かい</span></div><div class="row"><span>こうげき・ハート</span><span>${ATK()}・${LIV()}</span></div><div class="row"><span>ジムで とっくん</span><span>${S.gym||0}かい</span></div>`;
  if(S.stage===0)h+=`<p style="font-weight:800">九九を 5もん せいかい すると うまれるよ（いま ${Math.min(S.warm||0,5)}もん）</p>`;
- else if(q){h+=`<h3 style="margin:10px 0 4px">つぎの しんかまで</h3><div class="ck ${q.exp[2]?"ok":""}"><i>${q.exp[2]?"✅":"⭐"}</i>けいけんち ${Math.min(q.exp[0],q.exp[1])} / ${q.exp[1]}</div><div class="ck ${q.min[2]?"ok":""}"><i>${q.min[2]?"✅":"⏰"}</i>${q.min[2]?"そだてた じかん OK":"あと "+fmt(q.min[1]-q.min[0])+" そだてる"}</div>`+(q.gems?`<div class="ck ${q.gems[2]?"ok":""}"><i>${q.gems[2]?"✅":"💎"}</i>マスターした だん ${q.gems[0]} / ${q.gems[1]}</div>`:"")+(S.sick?`<div class="ck"><i>💊</i>びょうきを なおそう</div>`:"")+(S.stage===3?`<p style="font-size:13px;color:var(--soft)">この じきに うんちを ほうっておくと…？</p>`:"")+`<p style="font-size:13px;color:var(--soft)">けいけんちは 九九で かせぐ・ジム・ボスせんで たまるよ</p>`}
+ else if(q){h+=`<h3 style="margin:10px 0 4px">つぎの しんかまで</h3><div class="ck ${q.exp[2]?"ok":""}"><i>${q.exp[2]?"✅":"⭐"}</i>けいけんち ${Math.min(q.exp[0],q.exp[1])} / ${q.exp[1]}</div><div class="ck ${q.min[2]?"ok":""}"><i>${q.min[2]?"✅":"⏰"}</i>${q.min[2]?"そだてた じかん OK":"あと "+fmt(q.min[1]-q.min[0])+" いっしょに すごす"}</div>`+(q.gems?`<div class="ck ${q.gems[2]?"ok":""}"><i>${q.gems[2]?"✅":"💎"}</i>マスターした だん ${q.gems[0]} / ${q.gems[1]}</div>`:"")+(S.sick?`<div class="ck"><i>💊</i>びょうきを なおそう</div>`:"")+(S.stage===3?`<p style="font-size:13px;color:var(--soft)">この じきに うんちを ほうっておくと…？</p>`:"")+`<p style="font-size:13px;color:var(--soft)">けいけんちは 九九で かせぐ・うたで かせぐ・ジム・ボスせんで たまるよ。⏰は しんかに ひつような じかん（その すがたで すごす じかん）だよ</p>`}
  else h+=`<p style="font-weight:800">もう さいごの すがただよ！</p><button class="big go" id="newEgg">たびだち（あたらしい たまご）</button>`;
  $("stBody").innerHTML=h;openOv("stOv");const ne=$("newEgg");if(ne)ne.onclick=()=>{sfx.fan();S.gen=(S.gen||1)+1;save();openPick()}}
 $("stBack").onclick=()=>{sfx.tap();closeOv()};
-$("stTile").onclick=()=>{sfx.tap();openSt()};
+$("stTile").onclick=()=>{sfx.tap();openSt()};$("evoPill").onclick=()=>{sfx.tap();openSt()};
 $("toiletBtn").onclick=doToilet;
 $("gymBtn").onclick=()=>{sfx.tap();const sm=$("gymBtn").querySelector("small");if(!S.sp||S.stage===0){sm.textContent="うまれてから つかえるよ";return}if(S.coins<30){sfx.boo();sm.textContent="お金が たりないよ（30円）";vo("n_poor");return}sm.textContent="1かい 30円・けいけんち たくさん";S.coins-=30;save();showCoins();bumpW();startX("gym")};
 
