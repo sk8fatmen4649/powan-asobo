@@ -765,7 +765,7 @@ function finishCare(k){addBond(3);if(k==="clean"){S.inv.soap--;drawTray();const[
  else{const[x,y]=ctr(BABY.querySelector(".zHead"));for(let i=0;i<10;i++)setTimeout(()=>sparkle(x+Math.random()*160-80,y+Math.random()*80-40),i*50);say("さらさら〜！ありがとう！");vo("b_comb")}
  S.n.joy=Math.min(100,S.n.joy+10);sfx.joy();reactF("joy","big",1800);anim(BABY,"jump");hearts(...ctr(BABY.querySelector(".zHead")));save();drawNeeds()}
 let busy=false;
-function tapUse(id,slot){const it=IT[id];if(S.stage===0){anim(BABY,"shake");say("まだ たまごだよ。九九で あたためてね",2200);return}if(it.use==="broom"){sweep();return}if(it.use==="med"){giveMed();return}
+function tapUse(id,slot){const it=IT[id];if(S.stage===0){anim(BABY,"shake");say("まだ たまごだよ。九九か うたで あたためてね",2200);return}if(it.use==="broom"){sweep();return}if(it.use==="med"){giveMed();return}
  if(it.food!=null){const g=ghost(id,...ctr(slot));const[mx,my]=ctr(BABY.querySelector(".zMouth"));busy=true;mouthOpen=true;moodFace();
   g.animate([{transform:g.style.transform},{transform:`translate(${(ctr(slot)[0]+mx)/2}px,${my-80}px) scale(1.2)`,offset:.5},{transform:`translate(${mx}px,${my}px) scale(.8)`}],{duration:650,easing:"ease-in-out"}).onfinish=()=>{g.remove();busy=false;mouthOpen=false;feed(id)};return}
  if(it.use){const k=it.use;if(S.n[k]>=100){say(k==="hair"?"もう さらさら！":"もう ぴかぴか！");return}
@@ -970,12 +970,12 @@ function listenTick(){const t=AU.currentTime,d=t-L.last;
  if(d>0&&d<1.5){L.heard+=d;for(const[k,x]of Object.entries(TT())){const v=Array.isArray(x)?x[0]:x;if(v>L.last&&v<=t&&!L.got.has(k)){L.got.add(k);showLyric(k);earnSong(1)}}}
  L.last=t;$("lBar").style.width=(AU.duration?t/AU.duration*100:0)+"%"}
 function showLyric(k){const[a,b]=k.split("x").map(Number),l=$("lyric");l.innerHTML=`<b style="color:${DC[a]}">${a} × ${b} = ${a*b}</b><small>${Y[a][b-1]}</small>`;l.classList.remove("hit");void l.offsetWidth;l.classList.add("hit")}
-function earnSong(n){if(songLeft()<=0)return;n=Math.min(n,songLeft());S.songDay.c+=n;S.coins+=n;gainExp(n,true);save();coinFly($("lyric"),$("lWallet"),()=>{showCoins();bumpW();sfx.coin()});drawListen()}
+function earnSong(n){if(songLeft()<=0)return;n=Math.min(n,songLeft());S.songDay.c+=n;S.coins+=n;gainExp(n);save();coinFly($("lyric"),$("lWallet"),()=>{showCoins();bumpW();sfx.coin()});drawListen()}
 AU.addEventListener("ended",()=>{if(aMode==="listen"&&L){if(AU.duration&&L.heard>AU.duration*.85&&songLeft()>0){earnSong(Object.keys(TT()).length?20:30);confetti();sfx.fan();say("うた じょうず！",1600)}aMode=null;drawListen()}});
 $("lBack").onclick=()=>{sfx.tap();closeOv()};
 
 /* ========== なまえ ========== */
-$("nameOk").onclick=()=>{S.name=$("nameIn").value.trim()||SP[S.sp].nm;save();ctx();sfx.joy();closeOv();setTimeout(()=>{say(S.stage?"よろしくね！":"九九で あたためてね！",2600)},300)};
+$("nameOk").onclick=()=>{S.name=$("nameIn").value.trim()||SP[S.sp].nm;save();ctx();sfx.joy();closeOv();setTimeout(()=>{say(S.stage?"よろしくね！":"九九か うたで あたためてね！",2600)},300)};
 
 
 /* ========== なかよし ========== */
@@ -1121,7 +1121,7 @@ function drawStage(){const t=$("stTile");if(!t)return;const r=REQ[S.stage],p=S.s
  $("sickI").hidden=!S.sick||S.stage===0;
  const ep=$("evoPill");let eh="",rd=false;
  if(!S.sp||isFinal())ep.hidden=true;else{ep.hidden=false;
-  if(S.stage===0)eh=`🥚 九九で あたためよう <span class="eb"><i style="width:${p*100}%"></i></span>${Math.min(S.warm||0,5)}/5`;
+  if(S.stage===0)eh=`🥚 九九か うたで あたためよう <span class="eb"><i style="width:${p*100}%"></i></span>${Math.min(S.warm||0,5)}/5`;
   else{const q=reqState();rd=canEvo();eh=rd?"✨ もうすぐ しんか！":`⭐ しんかまで <span class="eb"><i style="width:${p*100}%"></i></span>${Math.min(q.exp[0],q.exp[1])}/${q.exp[1]}`+(q.min[2]?"":` ⏰${fmtM(q.min[1]-q.min[0])}`)+(q.gems&&!q.gems[2]?` 💎${q.gems[0]}/${q.gems[1]}`:"")}
   if(ep.dataset.h!==eh){ep.innerHTML=eh;ep.dataset.h=eh}ep.classList.toggle("ready",rd)}$("toiletBtn").hidden=!S.sp||S.stage===0}
 const fmtM=m=>m>=60?Math.floor(m/60)+"じかん"+(m%60>=1?Math.floor(m%60)+"ふん":""):Math.max(1,Math.ceil(m))+"ふん";
@@ -1144,7 +1144,7 @@ $("forms").addEventListener("click",e=>{if(e.target.closest("#mzGo")){sfx.tap();
 $("mzBack").onclick=()=>{sfx.tap();openZukan()};
 function openSt(){const q=reqState(),age=S.born&&S.stage?Math.floor((Date.now()-S.born)/864e5):0,fmt=m=>m>=60?Math.floor(m/60)+"じかん"+(m%60>=1?Math.floor(m%60)+"ふん":""):Math.max(1,Math.ceil(m))+"ふん";
  let h=`<div class="row"><span>なまえ</span><span>${nm()}</span></div><div class="row"><span>すがた</span><span>${formName()}（${STG[S.stage]}）</span></div><div class="row"><span>うまれてから</span><span>${age}にち</span></div><div class="row"><span>${S.gen||1}だいめ</span><span>おせわミス ${S.cm||0}かい</span></div><div class="row"><span>こうげき・ハート</span><span>${ATK()}・${LIV()}</span></div><div class="row"><span>ジムで とっくん</span><span>${S.gym||0}かい</span></div>`;
- if(S.stage===0)h+=`<p style="font-weight:800">九九を 5もん せいかい すると うまれるよ（いま ${Math.min(S.warm||0,5)}もん）</p>`;
+ if(S.stage===0)h+=`<p style="font-weight:800">九九を 5もん とくか、うたを 5ぎょう きくと うまれるよ（いま ${Math.min(S.warm||0,5)}/5）</p>`;
  else if(q){h+=`<h3 style="margin:10px 0 4px">つぎの しんかまで</h3><div class="ck ${q.exp[2]?"ok":""}"><i>${q.exp[2]?"✅":"⭐"}</i>けいけんち ${Math.min(q.exp[0],q.exp[1])} / ${q.exp[1]}</div><div class="ck ${q.min[2]?"ok":""}"><i>${q.min[2]?"✅":"⏰"}</i>${q.min[2]?"そだてた じかん OK":"あと "+fmt(q.min[1]-q.min[0])+" いっしょに すごす"}</div>`+(q.gems?`<div class="ck ${q.gems[2]?"ok":""}"><i>${q.gems[2]?"✅":"💎"}</i>マスターした だん ${q.gems[0]} / ${q.gems[1]}</div>`:"")+(S.sick?`<div class="ck"><i>💊</i>びょうきを なおそう</div>`:"")+(S.stage===3?`<p style="font-size:13px;color:var(--soft)">この じきに うんちを ほうっておくと…？</p>`:"")+`<p style="font-size:13px;color:var(--soft)">けいけんちは 九九で かせぐ・うたで かせぐ・ジム・ボスせんで たまるよ。⏰は しんかに ひつような じかん（その すがたで すごす じかん）だよ</p>`}
  else h+=`<p style="font-weight:800">もう さいごの すがただよ！</p><button class="big go" id="newEgg">たびだち（あたらしい たまご）</button>`;
  $("stBody").innerHTML=h;openOv("stOv");const ne=$("newEgg");if(ne)ne.onclick=()=>{sfx.fan();S.gen=(S.gen||1)+1;save();openPick()}}
