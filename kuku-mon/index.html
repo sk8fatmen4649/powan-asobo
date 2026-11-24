@@ -973,7 +973,7 @@ function drawListen(){$("lPlay").disabled=!songOK;$("lPlay").textContent=aMode==
 $("lPlay").onclick=()=>{ctx();if(aMode==="listen"&&!AU.paused){AU.pause();drawListen();return}
  if(aMode!=="listen"){stopAudio();aMode="listen";L={last:0,got:new Set(),heard:0};AU.currentTime=0}AU.play().catch(()=>{});drawListen()};
 AU.addEventListener("play",()=>{if($("songOv").classList.contains("on"))drawListen()});AU.addEventListener("pause",()=>{if($("songOv").classList.contains("on"))drawListen()});
-function listenTick(){const t=AU.currentTime,d=t-L.last;
+function listenTick(){const t=AU.currentTime;if(L.seekTo!=null){if(Math.abs(t-L.seekTo)>1.5){try{AU.currentTime=L.seekTo}catch(e){}L.last=L.seekTo;return}L.seekTo=null;L.last=t}const d=t-L.last;
  if(d>0&&d<1.5){L.heard+=d;for(const[k,x]of Object.entries(TT())){const v=Array.isArray(x)?x[0]:x;if(v>L.last&&v<=t&&!L.got.has(k)){L.got.add(k);if(L.egg)eggLine(k);else{showLyric(k);earnSong(1)}}}}
  L.last=t;$("lBar").style.width=(AU.duration?t/AU.duration*100:0)+"%"}
 function showLyric(k){const[a,b]=k.split("x").map(Number),l=$("lyric");l.innerHTML=`<b style="color:${DC[a]}">${a} × ${b} = ${a*b}</b><small>${Y[a][b-1]}</small>`;l.classList.remove("hit");void l.offsetWidth;l.classList.add("hit")}
@@ -1160,10 +1160,13 @@ $("stTile").onclick=()=>{sfx.tap();openSt()};$("evoPill").onclick=()=>{sfx.tap()
 $("toiletBtn").onclick=doToilet;
 $("gymBtn").onclick=()=>{sfx.tap();const sm=$("gymBtn").querySelector("small");if(!S.sp||S.stage===0){sm.textContent="うまれてから つかえるよ";return}if(S.coins<30){sfx.boo();sm.textContent="お金が たりないよ（30円）";vo("n_poor");return}sm.textContent="1かい 30円・けいけんち たくさん";S.coins-=30;save();showCoins();bumpW();startX("gym")};
 
+function danT(d){const v=TT()[d+"x1"];return v==null?null:(Array.isArray(v)?v[0]:v)}
+function rndDan(ex){const ds=[];for(let d=S.dan1?1:2;d<=9;d++)if(d!==ex&&danT(d)!=null)ds.push(d);return ds[Math.random()*ds.length|0]||2}
+function singDan(d){const t=danT(d);if(t==null)return;L.dan=d;L.got=new Set();L.seekTo=Math.max(0,t-1.2);try{AU.currentTime=L.seekTo}catch(e){}L.last=L.seekTo;L.lyr=`${d}のだん！`;drawEggSing()}
 function eggSing(){ctx();if(!S.sp||S.asleep)return;const b=$("eggSing");
  if(aMode==="listen"&&L&&L.egg&&!AU.paused){AU.pause();bgmDuck=1;drawEggSing();return}
  if(!songOK){say("うたが まだ よみこめて いないよ");return}
- if(!(aMode==="listen"&&L&&L.egg)){stopAudio();aMode="listen";L={last:0,got:new Set(),heard:0,egg:1,ate:0};const f=Object.values(TT()).map(v=>Array.isArray(v)?v[0]:v).sort((a,b)=>a-b)[0]||0;try{AU.currentTime=Math.max(0,f-1.5)}catch(e){}L.last=AU.currentTime}
+ if(!(aMode==="listen"&&L&&L.egg)){stopAudio();aMode="listen";L={last:0,got:new Set(),heard:0,egg:1,ate:0};singDan(rndDan())}
  bgmDuck=.15;AU.play().catch(()=>{});drawEggSing()}
 function shootEq(a,b,done,tsel){const rr=$("room").getBoundingClientRect(),[tx,ty]=ctr(BABY.querySelector(tsel||".zBody")),left=Math.random()<.5,sx=left?rr.left+20:rr.right-150,sy=rr.top+rr.height*(.15+Math.random()*.2);
  part(sx,sy,`<span style="font:400 34px 'Mochiy Pop One';color:${DC[a]};-webkit-text-stroke:2px #fff;paint-order:stroke;text-shadow:0 3px 0 rgba(0,0,0,.15);white-space:nowrap">${a}×${b}=${a*b}</span>`,"",
@@ -1171,6 +1174,8 @@ function shootEq(a,b,done,tsel){const rr=$("room").getBoundingClientRect(),[tx,t
  for(let i=0;i<5;i++)setTimeout(()=>sparkle(sx+60+(tx-sx)*i/5,sy+(ty-sy)*i/5),i*150);
  tone(660,1320,.5,"sine",.08);setTimeout(()=>{burst(tx,ty,18);for(let i=0;i<6;i++)sparkle(tx+Math.random()*120-60,ty+Math.random()*100-50);tone(1568,1568,.08,"square",.06);tone(2093,2093,.15,"square",.05,.08);done&&done()},880)}
 function eggLine(k){const[a,b]=k.split("x").map(Number);
+ if(a!==L.dan){return}
+ if(b===9){const nd=rndDan(a);setTimeout(()=>{if(aMode==="listen"&&L&&L.egg&&!AU.paused){singDan(nd);toast(`♪ つぎは ${nd}のだん！`)}},1900)}
  if(S.stage>0){L.ate++;L.lyr=`${a}×${b}=${a*b}　${Y[a][b-1]}`;drawEggSing();
   shootEq(a,b,()=>{sfx.eat();anim(BABY,"jump");reactF("joy","big",900);S.n.food=Math.min(100,S.n.food+3);S.n.joy=Math.min(100,S.n.joy+1);S.n.toilet=Math.max(8,S.n.toilet-1);gainExp(1);save();drawNeeds();
    const[mx,my]=ctr(BABY.querySelector(".zMouth"));part(mx-20,my-50,'<span style="font:400 22px &quot;Mochiy Pop One&quot;;color:#ff9f43;-webkit-text-stroke:1px #fff;paint-order:stroke">もぐもぐ</span>',"",[{transform:"translateY(0)",opacity:1},{transform:"translateY(-40px)",opacity:0}],900)},".zMouth");return}
@@ -1188,7 +1193,7 @@ addEventListener("visibilitychange",()=>{if(document.hidden)save()});
 {const now=Date.now(),f=Math.min(S.n.food,20),j=Math.min(S.n.joy,20);for(let t=Math.max(S.last,now-3*864e5);t<now;t+=60000){const h=new Date(t).getHours();if(h>=21||h<7)continue;decay(Math.min(60,(now-t)/1000),true)}S.n.food=Math.max(f,S.n.food);S.n.joy=Math.max(j,S.n.joy)}
 drawRoom();
 if(!S.sp)openPick();else if(!S.name){look($("nameBaby"));openOv("nameOv")}
-if(FAST)window.T={get G(){return G},get S(){return S},drawRoom:()=>drawRoom(),save:()=>save()};
+if(FAST)window.T={get G(){return G},get S(){return S},get AU(){return AU},get L(){return L},drawRoom:()=>drawRoom(),save:()=>save()};
 }
 </script>
 <script>try{if("serviceWorker" in navigator&&location.protocol==="https:"&&/github\.io$/.test(location.hostname))navigator.serviceWorker.register("sw.js").catch(()=>{})}catch(e){}</script>
