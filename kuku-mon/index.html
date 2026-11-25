@@ -931,7 +931,7 @@ $("sBack").onclick=()=>{sfx.tap();closeOv();if(Object.values(S.wear).some(Boolea
 $("shopWork").onclick=()=>{sfx.tap();$("shopWork").classList.remove("pulse");$("sBack").onclick()};
 $("goWork").onclick=()=>{sfx.tap();openWork()};
 $("goShop").onclick=()=>{sfx.tap();openShop()};
-$("goSong").onclick=()=>{sfx.tap();ctx();if(singAct()){if(AU.paused)eggSing();else stopSing();return}const dp=$("danPop");if(!dp.hidden){dp.hidden=true;return}
+$("goSong").onclick=()=>{sfx.tap();ctx();if(singAct()){if(SG.paused)eggSing();else stopSing();return}const dp=$("danPop");if(!dp.hidden){dp.hidden=true;return}
  const lo=S.dan1?1:2;$("dpG").innerHTML=`<button data-d="0" style="background:linear-gradient(#c7a6ff,#8e5cff)">🎲<small>おまかせ</small></button>`+Array.from({length:10-lo},(_,i)=>lo+i).map(d=>`<button data-d="${d}" style="background:linear-gradient(${DL[d]},${DC[d]})">${d}<small>のだん</small>${(S.sung||{})[d]?`<em>⭐${S.sung[d]>1?S.sung[d]:""}</em>`:""}</button>`).join("");dp.hidden=false;vo("n_song")};
 $("dpG").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;sfx.tap();$("danPop").hidden=true;eggSing(+b.dataset.d||0)});
 $("room").addEventListener("pointerdown",e=>{const dp=$("danPop");if(!dp.hidden&&!e.target.closest("#danPop"))dp.hidden=true});
@@ -963,7 +963,7 @@ $("songIn").onchange=e=>{const f=e.target.files[0];if(!f)return;S.ownSong=true;S
  DB.put("song",{blob:f,name:f.name}).then(()=>{$("songName").textContent="♪ "+f.name+"（ほぞんしました）"}).catch(()=>{$("songName").textContent="♪ "+f.name+"（この たんまつでは ほぞんできないので、ひらくたびに えらんでね）"})};
 const KEYS=[];for(let a=1;a<=9;a++)for(let b=1;b<=9;b++)KEYS.push(a+"x"+b);
 function snipRange(k){const v=TT()[k];if(v==null)return null;if(Array.isArray(v))return[v[0],Math.min(v[1]+.3,v[0]+6)];const t=v;const nx=Object.values(S.songT).filter(v=>v>t+.3).sort((x,y)=>x-y)[0];return[t,Math.min(nx!=null?nx:t+4,t+6)]}
-function stopAudio(){if(aMode){AU.pause();SN.pause()}aMode=null;clearTimeout(snipT);$("notes").classList.remove("on")}
+function stopAudio(){try{SG.pause()}catch(e){}if(aMode){AU.pause();SN.pause()}aMode=null;clearTimeout(snipT);$("notes").classList.remove("on")}
 const SN=new Audio();SN.preload="auto";let snK="";SN.addEventListener("play",()=>{bgmDuck=.35});SN.addEventListener("ended",()=>{bgmDuck=1});SN.addEventListener("pause",()=>{bgmDuck=1});
 function snipLoad(k){if(S.ownSong||snK===k)return;snK=k;SN.src="s2/"+k+".mp3";try{SN.load()}catch(e){}}
 SN.addEventListener("ended",()=>{if(aMode==="snip"){aMode=null;$("notes").classList.remove("on")}});
@@ -1186,27 +1186,31 @@ $("gymBtn").onclick=()=>{sfx.tap();const sm=$("gymBtn").querySelector("small");i
 
 function danT(d){const v=TT()[d+"x1"];return v==null?null:(Array.isArray(v)?v[0]:v)}
 function rndDan(ex){const ds=[];for(let d=S.dan1?1:2;d<=9;d++)if(d!==ex&&danT(d)!=null)ds.push(d);return ds[Math.random()*ds.length|0]||2}
-function danEnd(d){const v=TT()[d+"x9"];if(v==null)return 1e9;const e=Array.isArray(v)?v[1]:v+2;let end=e+3.64;const nx=danT(d+1);if(nx!=null&&nx-1.9<end)end=nx-1.9;return Math.max(e+.3,end)}
+const SG=new Audio();SG.preload="auto";const DSEG={"1": [8.89, 30.93], "2": [30.83, 52.75], "3": [52.65, 76.62], "4": [81.82, 103.51], "5": [103.41, 125.46], "6": [125.36, 149.33], "7": [154.6, 178.94], "8": [180.15, 204.12], "9": [205.61, 229.58]};
 const singAct=()=>aMode==="listen"&&L&&L.egg;
-function singDan(d){const t=danT(d);if(t==null)return;L.dan=d;L.got=new Set();L.endT=danEnd(d);L.seekTo=Math.max(0,t-2);try{AU.currentTime=L.seekTo}catch(e){}L.last=L.seekTo;L.eq=`${d}のだん`;L.yo="♪ はじまるよ";drawEggSing()}
+function singDan(d){if(!DSEG[d])return;L.dan=d;L.base=DSEG[d][0];L.endT=DSEG[d][1];L.got=new Set();L.last=L.base;L.cur=L.base;SG.src="songs/dan"+d+".mp3";L.eq=`${d}のだん`;L.yo="♪ はじまるよ";drawEggSing()}
+function singTick(){if(!singAct())return;const t=SG.currentTime+L.base,d=t-L.last;L.cur=t;
+ if(d>0&&d<1.5){for(let b=1;b<=9;b++){const k=L.dan+"x"+b,v=BT[k][0];if(v>L.last&&v<=t&&!L.got.has(k)){L.got.add(k);eggLine(k)}}}
+ L.last=t;if(t>=L.endT)finishSing()}
+SG.addEventListener("timeupdate",singTick);SG.addEventListener("ended",()=>{if(singAct())finishSing()});
+SG.addEventListener("pause",()=>{if(singAct()){bgmDuck=1;drawEggSing()}});SG.addEventListener("play",()=>{if(singAct()){bgmDuck=.15;drawEggSing()}});
 function eggSing(pick){ctx();if(!S.sp||S.asleep)return;
- if(singAct()){if(AU.paused){bgmDuck=.15;AU.play().catch(()=>{});drawEggSing()}return}
- if(!songOK){say("うたが まだ よみこめて いないよ");return}
+ if(singAct()){if(SG.paused){SG.play().catch(()=>{});drawEggSing()}return}
  stopAudio();try{VA.pause()}catch(e){}aMode="listen";L={last:0,got:new Set(),heard:0,egg:1,earn:0};singDan(typeof pick==="number"&&pick?pick:rndDan());
- bgmDuck=.15;let go=false;const play=()=>{if(go)return;go=true;AU.play().catch(()=>{});drawEggSing()};AU.addEventListener("seeked",play,{once:true});setTimeout(play,1200)}
+ bgmDuck=.15;SG.play().catch(()=>{});drawEggSing()}
 function finishSing(){if(!singAct())return;const a=L.dan,g=songCoin(10);L.earn+=g;const tot=L.earn;S.sung=S.sung||{};S.sung[a]=(S.sung[a]||0)+1;save();stopAudio();bgmDuck=1;L=null;drawEggSing();
  confetti();sfx.fan();reactF("joy","big",2000);anim(BABY,"jump");say(`${a}のだん クリア！`,2600);toast(`うたで ${tot}円 かせいだよ！`)}
 function songCoin(n,el){if(songLeft()<=0)return 0;n=Math.min(n,songLeft());S.songDay.c+=n;S.coins+=n;save();coinFly(el||BABY.querySelector(".zHead"),$("wallet"),()=>{showCoins();bumpW();sfx.coin()});return n}
 function eggLine(k){const[a,b]=k.split("x").map(Number);if(a!==L.dan)return;
  L.eq=`${a} × ${b} = ${a*b}`;L.yo=Y[a][b-1];L.earn=(L.earn||0)+songCoin(1);
- BABY.style.setProperty("--dd",-(((AU.currentTime-.489)%.909+.909)%.909)+"s");
+ BABY.style.setProperty("--dd",-(((L.cur-.489)%.909+.909)%.909)+"s");
  const[x,y]=ctr(BABY.querySelector(".zHead"));hearts(x,y-20,2,"♪","#8e5cff");drawEggSing()}
 function useHeater(){ctx();if(S.stage!==0){say("もう うまれたよ！");return}if(S.heatEnd){say("いま あたためてるよ");return}
  S.inv.heater=Math.max(0,(S.inv.heater||0)-1);S.heatEnd=Date.now()+HEAT;save();drawTray();drawStage();sfx.joy();anim(BABY,"shake");say("ぽかぽか… 1ぷんで うまれるよ",2600)}
-function drawEggSing(){const b=$("eggSing"),act=singAct(),on=act&&!AU.paused;b.hidden=!act;b.classList.toggle("on",!!on);b.classList.toggle("sm",true);BABY.classList.toggle("dancing",!!on);document.body.classList.toggle("singing",!!act);
+function drawEggSing(){const b=$("eggSing"),act=singAct(),on=act&&!SG.paused;b.hidden=!act;b.classList.toggle("on",!!on);b.classList.toggle("sm",true);BABY.classList.toggle("dancing",!!on);document.body.classList.toggle("singing",!!act);
  const gt=$("goSongT");if(gt)gt.textContent=on?"とめる":act?"つづきを うたう":"うたで かせぐ";if(!act){b.dataset.h="";return}
  const h=`<b class="sgEq" style="color:${DC[L.dan]||"#fff"}">${L.eq||""}</b><span class="sgYo">${L.yo||""}</span><small>${on?"":"▶ タップで つづきを うたう　"}${songLeft()>0?`かせいだ お金 ${L.earn||0}円`:"きょうの お金は おしまい"}　さいごまで きいてね</small>`;if(b.dataset.h!==h){b.innerHTML=h;b.dataset.h=h}}
-$("eggSing").onclick=()=>{if(singAct()&&AU.paused)eggSing()};
+$("eggSing").onclick=()=>{if(singAct()&&SG.paused)eggSing()};
 function stopSing(){if(!singAct())return;const e=L.earn||0;stopAudio();bgmDuck=1;L=null;drawEggSing();$("danPop").hidden=true;closeOv();toast(`とちゅうで やめたよ（${e}円 かせいだよ）`)}
 ["click","pointerdown","pointerup","touchstart"].forEach(ev=>document.addEventListener(ev,e=>{if(singAct()&&!e.target.closest("#goSong,#eggSing")){e.stopPropagation();if(ev==="click")e.preventDefault()}},true));
 AU.addEventListener("pause",()=>{if(L&&L.egg){bgmDuck=1;drawEggSing()}});AU.addEventListener("ended",()=>{if(L&&L.egg)finishSing()});
