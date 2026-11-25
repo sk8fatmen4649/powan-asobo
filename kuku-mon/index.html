@@ -932,7 +932,7 @@ $("shopWork").onclick=()=>{sfx.tap();$("shopWork").classList.remove("pulse");$("
 $("goWork").onclick=()=>{sfx.tap();openWork()};
 $("goShop").onclick=()=>{sfx.tap();openShop()};
 $("goSong").onclick=()=>{sfx.tap();ctx();if(singAct()){if(AU.paused)eggSing();else stopSing();return}const dp=$("danPop");if(!dp.hidden){dp.hidden=true;return}
- const lo=S.dan1?1:2;$("dpG").innerHTML=`<button data-d="0" style="background:linear-gradient(#c7a6ff,#8e5cff)">🎲<small>おまかせ</small></button>`+Array.from({length:10-lo},(_,i)=>lo+i).map(d=>`<button data-d="${d}" style="background:linear-gradient(${DL[d]},${DC[d]})">${d}<small>のだん</small>${(S.sung||{})[d]?`<em>⭐${S.sung[d]>1?S.sung[d]:""}</em>`:""}</button>`).join("");dp.hidden=false};
+ const lo=S.dan1?1:2;$("dpG").innerHTML=`<button data-d="0" style="background:linear-gradient(#c7a6ff,#8e5cff)">🎲<small>おまかせ</small></button>`+Array.from({length:10-lo},(_,i)=>lo+i).map(d=>`<button data-d="${d}" style="background:linear-gradient(${DL[d]},${DC[d]})">${d}<small>のだん</small>${(S.sung||{})[d]?`<em>⭐${S.sung[d]>1?S.sung[d]:""}</em>`:""}</button>`).join("");dp.hidden=false;vo("n_song")};
 $("dpG").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;sfx.tap();$("danPop").hidden=true;eggSing(+b.dataset.d||0)});
 $("room").addEventListener("pointerdown",e=>{const dp=$("danPop");if(!dp.hidden&&!e.target.closest("#danPop"))dp.hidden=true});
 $("think").onclick=()=>{const ni=needInfo();if(!ni||busy)return;sfx.tap();if(ni.step==="toilet"){doToilet();return}if(ni.step==="use"){const s=document.querySelector(`.slot[data-id="${ni.own[0]}"]`);if(s)tapUse(ni.own[0],s)}else if(ni.step==="light")toggleLight();else if(ni.step==="shop")openShop();else openWork()};
