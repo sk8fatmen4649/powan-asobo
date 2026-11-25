@@ -704,8 +704,8 @@ let jp=null;try{const pick=()=>{const v=speechSynthesis.getVoices();jp=v.find(x=
 function speak(t,pitch=1.2,rate=1){if(!S.voice||!window.speechSynthesis)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="ja-JP";if(jp)u.voice=jp;u.pitch=pitch;u.rate=rate;speechSynthesis.speak(u)}catch(e){}}
 const VA=new Audio();VA.preload="auto";let voT=0,welcomed=0,needVoT=0,needPend=null;
 function needVo(){const ni=needPend;if(!ni||!ac||!S.voice||document.querySelector(".ov.on")||Date.now()-voT<3500||Date.now()-needVoT<20000)return;const cur=needInfo();if(!cur||cur.k!==ni.k){needPend=null;return}needPend=null;needVoT=Date.now();if(cur.k==="sleep"){vo(cur.ns==="book"?"b_wantstory":"b_sleepy");voLater({lamp:"n_lamp",book:"n_needbook",light:"n_light"}[cur.ns],2400);return}vo({food:"b_hungry",hair:"b_hair",clean:"b_dirty",joy:"b_lonely"}[cur.k]);voLater({work:"n_work",shop:"n_shopgo",use:"n_use"}[cur.step],2200)}
-function vo(k){if(!k)return;if(k.startsWith("b_")){petCry();return}if(!S.voice)return;try{if(window.speechSynthesis)speechSynthesis.cancel();VA.pause();VA.src="vo2/"+k+".mp3";VA.play().catch(()=>{});voT=Date.now()}catch(e){}}
-function voLater(k,ms){if(!k)return;if(k.startsWith("b_")){setTimeout(petCry,Math.min(ms,1200));return}const t0=voT;setTimeout(()=>{if(voT!==t0)return;if(!VA.paused&&!VA.ended){const go=()=>{VA.removeEventListener("ended",go);setTimeout(()=>{if(voT===t0)vo(k)},250)};VA.addEventListener("ended",go);setTimeout(()=>{VA.removeEventListener("ended",go)},8000)}else vo(k)},ms)}
+function vo(k){if(!k)return;if(aMode==="listen"&&L&&L.egg)return;if(k.startsWith("b_")){petCry();return}if(!S.voice)return;try{if(window.speechSynthesis)speechSynthesis.cancel();VA.pause();VA.src="vo2/"+k+".mp3";VA.play().catch(()=>{});voT=Date.now()}catch(e){}}
+function voLater(k,ms){if(!k)return;if(aMode==="listen"&&L&&L.egg)return;if(k.startsWith("b_")){setTimeout(petCry,Math.min(ms,1200));return}const t0=voT;setTimeout(()=>{if(voT!==t0)return;if(!VA.paused&&!VA.ended){const go=()=>{VA.removeEventListener("ended",go);setTimeout(()=>{if(voT===t0)vo(k)},250)};VA.addEventListener("ended",go);setTimeout(()=>{VA.removeEventListener("ended",go)},8000)}else vo(k)},ms)}
 
 /* ========== エフェクト ========== */
 const FX=$("fx");
@@ -989,7 +989,7 @@ document.querySelectorAll("[data-nd]").forEach(b=>b.onclick=()=>{if(!selK)return
 $("songReset").onclick=()=>{stopAudio();S.ownSong=false;save();useBuiltin()};
 $("sFirst").onclick=()=>{S.songFirst=!S.songFirst;save();drawSongSet()};
 /* うたで かせぐ */
-const CAP=100,today=()=>new Date().toDateString();
+const CAP=100000,today=()=>new Date().toDateString();
 function songLeft(){if(S.songDay.d!==today())S.songDay={d:today(),c:0};return CAP-S.songDay.c}
 function openSong(){stopAudio();showCoins();$("lBar").style.width="0";$("lyric").innerHTML="<b>♪ くくの うた ♪</b><small>きいて おぼえよう</small>";openOv("songOv");drawListen();vo("n_song")}
 function drawListen(){$("lPlay").disabled=!songOK;$("lPlay").textContent=aMode==="listen"&&!AU.paused?"❚❚":"▶";
@@ -1190,9 +1190,9 @@ function danEnd(d){const v=TT()[d+"x9"];if(v==null)return 1e9;const e=Array.isAr
 const singAct=()=>aMode==="listen"&&L&&L.egg;
 function singDan(d){const t=danT(d);if(t==null)return;L.dan=d;L.got=new Set();L.endT=danEnd(d);L.seekTo=Math.max(0,t-2);try{AU.currentTime=L.seekTo}catch(e){}L.last=L.seekTo;L.eq=`${d}のだん`;L.yo="♪ はじまるよ";drawEggSing()}
 function eggSing(pick){ctx();if(!S.sp||S.asleep)return;
- if(singAct()){if(AU.paused){bgmDuck=.15;AU.play().catch(()=>{});drawEggSing()}return}
+ if(singAct()){if(AU.paused){bgmDuck=.15;AU.play().catch(()=>{});drawEggSing()}else{const e=L.earn||0;stopAudio();bgmDuck=1;L=null;drawEggSing();toast(`とちゅうで やめたよ（${e}円 かせいだよ）`)}return}
  if(!songOK){say("うたが まだ よみこめて いないよ");return}
- stopAudio();aMode="listen";L={last:0,got:new Set(),heard:0,egg:1,earn:0};singDan(typeof pick==="number"&&pick?pick:rndDan());
+ stopAudio();try{VA.pause()}catch(e){}aMode="listen";L={last:0,got:new Set(),heard:0,egg:1,earn:0};singDan(typeof pick==="number"&&pick?pick:rndDan());
  bgmDuck=.15;let go=false;const play=()=>{if(go)return;go=true;AU.play().catch(()=>{});drawEggSing()};AU.addEventListener("seeked",play,{once:true});setTimeout(play,1200)}
 function finishSing(){if(!singAct())return;const a=L.dan,g=songCoin(10);L.earn+=g;const tot=L.earn;S.sung=S.sung||{};S.sung[a]=(S.sung[a]||0)+1;save();stopAudio();bgmDuck=1;L=null;drawEggSing();
  confetti();sfx.fan();reactF("joy","big",2000);anim(BABY,"jump");say(`${a}のだん クリア！`,2600);toast(`うたで ${tot}円 かせいだよ！`)}
@@ -1204,7 +1204,7 @@ function eggLine(k){const[a,b]=k.split("x").map(Number);if(a!==L.dan)return;
 function useHeater(){ctx();if(S.stage!==0){say("もう うまれたよ！");return}if(S.heatEnd){say("いま あたためてるよ");return}
  S.inv.heater=Math.max(0,(S.inv.heater||0)-1);S.heatEnd=Date.now()+HEAT;save();drawTray();drawStage();sfx.joy();anim(BABY,"shake");say("ぽかぽか… 1ぷんで うまれるよ",2600)}
 function drawEggSing(){const b=$("eggSing"),act=singAct(),on=act&&!AU.paused;b.hidden=!act;b.classList.toggle("on",!!on);b.classList.toggle("sm",true);BABY.classList.toggle("dancing",!!on);document.body.classList.toggle("singing",!!act);
- const gt=$("goSongT");if(gt)gt.textContent=on?"うたちゅう…":act?"つづきを うたう":"うたで かせぐ";if(!act){b.dataset.h="";return}
+ const gt=$("goSongT");if(gt)gt.textContent=on?"とめる":act?"つづきを うたう":"うたで かせぐ";if(!act){b.dataset.h="";return}
  const h=`<b class="sgEq" style="color:${DC[L.dan]||"#fff"}">${L.eq||""}</b><span class="sgYo">${L.yo||""}</span><small>${on?"":"▶ タップで つづきを うたう　"}${songLeft()>0?`かせいだ お金 ${L.earn||0}円`:"きょうの お金は おしまい"}　さいごまで きいてね</small>`;if(b.dataset.h!==h){b.innerHTML=h;b.dataset.h=h}}
 $("eggSing").onclick=eggSing;
 AU.addEventListener("pause",()=>{if(L&&L.egg){bgmDuck=1;drawEggSing()}});AU.addEventListener("ended",()=>{if(L&&L.egg)finishSing()});
