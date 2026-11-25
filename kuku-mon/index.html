@@ -759,7 +759,7 @@ function sleepNeed(){let ns,ids,step;
  if(ns==="lamp"&&S.own.lamp)step="light";
  return{k:"sleep",b:MOON,v:0,ids,own,step,ns}}
 function needInfo(){if(!S.sp)return null;if(S.stage===0){if(S.heatEnd)return null;const own=has("heater")?["heater"]:[];return{k:"heat",b:"🔥",v:0,ids:["heater"],own,step:own.length?"use":S.coins>=IT.heater.price?"shop":"work"}}
- if(isNight()&&!S.asleep&&Math.min(S.n.food,S.n.joy)>=25&&!S.sick&&!S.poop)return sleepNeed();if(S.asleep)return null;
+ if(S.asleep)return null;
  if(S.sick){const own=has("med")?["med"]:[];return{k:"med",b:"💊",v:0,ids:["med"],own,step:own.length?"use":S.coins>=IT.med.price?"shop":"work"}}
  if(S.poop){const own=has("broom")?["broom"]:[];return{k:"poop",b:"🧹",v:0,ids:["broom"],own,step:own.length?"use":S.coins>=IT.broom.price?"shop":"work"}}
  const lo=NEED.map(n=>({...n,v:S.n[n.k]})).sort((a,b)=>a.v-b.v)[0];if(lo.v>=45)return null;
@@ -1227,7 +1227,7 @@ AU.addEventListener("pause",()=>{if(L&&L.egg){bgmDuck=1;drawEggSing()}});AU.addE
 const sleepHour=()=>{const h=new Date().getHours();return h<5};
 function nightLockTick(){const on=sleepHour()&&!!S.sp,el=$("nightLock");if(on){if(el.hidden){stopSing&&singAct()&&stopSing();stopAudio();closeOv();S.asleep=true;save()}
   const src=curImg();if($("nlPet").getAttribute("src")!==src)$("nlPet").src=src;const d=new Date();$("nlClock").textContent=`いま ${d.getHours()}じ${String(d.getMinutes()).padStart(2,"0")}ふん`}
- else if(!el.hidden){S.asleep=false;S.lightOff=false;save();drawRoom()}
+ else if(!el.hidden||S.asleep){S.asleep=false;S.lightOff=false;save();drawRoom()}
  el.hidden=!on}
 setInterval(nightLockTick,5000);
 ["click","pointerdown","touchstart"].forEach(ev=>document.addEventListener(ev,e=>{if(!$("nightLock").hidden){e.stopPropagation();if(ev==="click")e.preventDefault()}},true));
