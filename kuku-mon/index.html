@@ -897,12 +897,9 @@ function check(){if(!G)return;const{a,b,ana,retry}=G.cur,ans=ana?b:a*b,ok=+G.inp
   $("msg").textContent=["せいかい！","すごい！","やったね！","かんぺき！"][Math.random()*4|0];$("msg").style.color="#11a06c";
   face($("mini"),"joy","big");$("cheer").textContent=G.combo>=3?`${G.combo}もん れんぞく！すごーい！`:["やったー！","ありがとう！","さすが〜！"][Math.random()*3|0];
   if(!hasSong)speak(Y[a][b-1],1.1,1.05);vo(G.combo===3||G.combo===6?"n_combo":["n_ok1","n_ok2","n_ok3"][Math.random()*3|0]);drawDots();setTimeout(()=>{if(!G)return;face($("mini"),"normal","smile");G.qs.length?next():finish()},1350)}
- else if(!G.cur.tries){G.cur.tries=1;G.combo=0;sfx.boo();drawEq("ng");$("msg").textContent="ちがうよ… うたを きいて もういちど！";$("msg").style.color="#8a5cf6";face($("mini"),"sad","sad");$("cheer").textContent="うたで おぼえよう♪";
+ else{const t=G.cur.tries||0;G.cur.tries=t+1;if(t===1){G.miss++;S.miss[key]=(S.miss[key]||0)+1;save()}G.combo=0;sfx.boo();drawEq("ng");$("msg").textContent="ちがうよ…";$("msg").style.color="#8a5cf6";face($("mini"),"sad","sad");$("cheer").textContent="うたで おぼえよう♪";
   setTimeout(()=>{if(!G)return;G.input=String(ans);drawEq("show");$("msg").innerHTML=`こたえは <span style="color:#e08a00">${ans}</span> だよ。おぼえてね！`;singCur();
-   setTimeout(()=>{if(!G)return;G.input="";drawEq();G.lock=false;face($("mini"),"normal","smile");$("msg").textContent="もういちど いれてみよう！"},2600)},700)}
- else{G.miss++;G.combo=0;S.miss[key]=(S.miss[key]||0)+1;save();sfx.boo();G.input=String(ans);drawEq("ng");G.done++;drawDots();
-  $("msg").innerHTML=`こたえは <span style="color:#ff5d8f">${ans}</span>`;$("msg").style.color="#4a2a45";face($("mini"),"sad","sad");$("cheer").textContent="にがてに いれたよ。また れんしゅうしよう！";
-  if(!playSnip(key))speak(Y[a][b-1],1.1,1);setTimeout(()=>{if(!G)return;face($("mini"),"normal","smile");G.qs.length?next():finish()},4000)}}
+   setTimeout(()=>{if(!G)return;G.input="";drawEq();G.lock=false;face($("mini"),"normal","smile");$("msg").textContent="もういちど いれてみよう！"},2600)},700)}}
 function finish(){const n=G.miss===0?3:G.miss<=2?2:1,bonus=n===3?30:0;S.coins+=bonus;
  if(typeof G.d==="number"&&n>(S.stars[G.d]||0))S.stars[G.d]=n;save();const tot=G.earned+bonus;G=null;
  addBond(4);resShow(stStr(n),tot,(bonus?"ぜんもん せいかい ボーナス +30円！ ":"")+(n===3?"くくマスター！":n===2?"よくできました！":"さいごまで がんばったね！"),true);
