@@ -156,6 +156,7 @@ button:focus-visible{outline:4px solid #4ea8ff;outline-offset:2px}
 .box{display:inline-block;min-width:1.5em;padding:0 .08em;border-radius:.22em;background:#ffeef4;color:var(--pink);text-align:center;box-shadow:inset 0 -.08em 0 #ffc2d6}
 .box.ok{background:#dcfff0;color:#11a06c;box-shadow:inset 0 -.08em 0 #9be8c8;animation:boing .5s}
 .box.ng{animation:shake .4s}
+.box.show{background:#fff3c4;color:#e08a00;box-shadow:inset 0 -.08em 0 #ffd36e;animation:boing .5s}
 @keyframes boing{30%{transform:scale(1.25)}60%{transform:scale(.95)}}
 .yomi{font-weight:800;color:var(--soft);font-size:18px;min-height:24px;text-align:center}
 .msg{font-family:"Mochiy Pop One";font-size:21px;min-height:28px;text-align:center}
@@ -897,7 +898,8 @@ function check(){if(!G)return;const{a,b,ana,retry}=G.cur,ans=ana?b:a*b,ok=+G.inp
   face($("mini"),"joy","big");$("cheer").textContent=G.combo>=3?`${G.combo}もん れんぞく！すごーい！`:["やったー！","ありがとう！","さすが〜！"][Math.random()*3|0];
   if(!hasSong)speak(Y[a][b-1],1.1,1.05);vo(G.combo===3||G.combo===6?"n_combo":["n_ok1","n_ok2","n_ok3"][Math.random()*3|0]);drawDots();setTimeout(()=>{if(!G)return;face($("mini"),"normal","smile");G.qs.length?next():finish()},1350)}
  else if(!G.cur.tries){G.cur.tries=1;G.combo=0;sfx.boo();drawEq("ng");$("msg").textContent="ちがうよ… うたを きいて もういちど！";$("msg").style.color="#8a5cf6";face($("mini"),"sad","sad");$("cheer").textContent="うたで おぼえよう♪";
-  setTimeout(()=>{if(!G)return;G.input="";drawEq();G.lock=false;face($("mini"),"normal","smile");singCur()},700)}
+  setTimeout(()=>{if(!G)return;G.input=String(ans);drawEq("show");$("msg").innerHTML=`こたえは <span style="color:#e08a00">${ans}</span> だよ。おぼえてね！`;singCur();
+   setTimeout(()=>{if(!G)return;G.input="";drawEq();G.lock=false;face($("mini"),"normal","smile");$("msg").textContent="もういちど いれてみよう！"},2600)},700)}
  else{G.miss++;G.combo=0;S.miss[key]=(S.miss[key]||0)+1;save();sfx.boo();G.input=String(ans);drawEq("ng");G.done++;drawDots();
   $("msg").innerHTML=`こたえは <span style="color:#ff5d8f">${ans}</span>`;$("msg").style.color="#4a2a45";face($("mini"),"sad","sad");$("cheer").textContent="にがてに いれたよ。また れんしゅうしよう！";
   if(!playSnip(key))speak(Y[a][b-1],1.1,1);setTimeout(()=>{if(!G)return;face($("mini"),"normal","smile");G.qs.length?next():finish()},4000)}}
