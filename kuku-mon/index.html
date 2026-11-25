@@ -381,6 +381,15 @@ body.singing #goWork,body.singing #goShop,body.singing .rside,body.singing #stTi
 .flushW.on{animation:waveA 2.6s ease-in-out}
 @keyframes waveA{0%,12%{transform:translateX(110%)}45%{transform:translateX(-10%)}60%{transform:translateX(-115%)}100%{transform:translateX(-115%)}}
 #evoOk{display:none;width:70%;position:relative;z-index:2}#evo.reveal #evoOk{display:flex}
+#nightLock{position:fixed;inset:0;z-index:100;background:linear-gradient(#0d1440,#2a2f6b);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;overflow:hidden}
+#nightLock[hidden]{display:none!important}
+.nlStars{position:absolute;inset:0;background-image:radial-gradient(2px 2px at 20% 15%,#fff8,transparent),radial-gradient(2px 2px at 70% 25%,#fff,transparent),radial-gradient(1.5px 1.5px at 40% 40%,#fffa,transparent),radial-gradient(2px 2px at 85% 60%,#fff9,transparent),radial-gradient(1.5px 1.5px at 10% 70%,#fff,transparent),radial-gradient(2px 2px at 55% 80%,#fff8,transparent);animation:tw 3s infinite}
+.nlMoon{font-size:64px;position:absolute;top:8%;right:10%}
+#nlPet{width:min(60vw,280px);max-height:38vh;object-fit:contain;filter:brightness(.75) saturate(.7);animation:breath 3.4s ease-in-out infinite}
+.nlZ{font-family:"Mochiy Pop One";font-size:34px;color:#cfd6ff;animation:bob 2s infinite}
+#nightLock h2{font-family:"Mochiy Pop One";font-weight:400;font-size:26px;margin:4px 0 0}
+#nightLock p{font-weight:800;font-size:17px;margin:0;line-height:1.6;color:#dfe3ff}
+.nlClock{font-family:"Mochiy Pop One";font-size:22px;color:#ffe9a8;margin-top:8px}
 </style>
 </head>
 <body>
@@ -553,6 +562,7 @@ body.singing #goWork,body.singing #goShop,body.singing .rside,body.singing #stTi
   <p id="evoP"></p>
   <button class="big go" id="evoOk">やったー！</button>
 </div>
+<div id="nightLock" hidden><div class="nlStars"></div><div class="nlMoon">🌙</div><img id="nlPet" alt=""><div class="nlZ">Z<small>z</small><small>z</small></div><h2>いまは ねる じかん</h2><p>あさ 5じに おきるよ。<br>また あした あそぼうね</p><div class="nlClock" id="nlClock"></div></div>
 <div id="fx"></div>
 <audio id="song"></audio>
 
@@ -1197,11 +1207,11 @@ function eggSing(pick){ctx();if(!S.sp||S.asleep)return;
  if(singAct()){if(SG.paused){SG.play().catch(()=>{});drawEggSing()}return}
  stopAudio();try{VA.pause()}catch(e){}aMode="listen";L={last:0,got:new Set(),heard:0,egg:1,earn:0};singDan(typeof pick==="number"&&pick?pick:rndDan());
  bgmDuck=.15;SG.play().catch(()=>{});drawEggSing()}
-function finishSing(){if(!singAct())return;const a=L.dan,g=songCoin(10);L.earn+=g;const tot=L.earn;S.sung=S.sung||{};S.sung[a]=(S.sung[a]||0)+1;save();stopAudio();bgmDuck=1;L=null;drawEggSing();
+function finishSing(){if(!singAct())return;const a=L.dan,g=songCoin(20);L.earn+=g;const tot=L.earn;S.sung=S.sung||{};S.sung[a]=(S.sung[a]||0)+1;save();stopAudio();bgmDuck=1;L=null;drawEggSing();
  confetti();sfx.fan();reactF("joy","big",2000);anim(BABY,"jump");say(`${a}のだん クリア！`,2600);toast(`うたで ${tot}円 かせいだよ！`)}
 function songCoin(n,el){if(songLeft()<=0)return 0;n=Math.min(n,songLeft());S.songDay.c+=n;S.coins+=n;save();coinFly(el||BABY.querySelector(".zHead"),$("wallet"),()=>{showCoins();bumpW();sfx.coin()});return n}
 function eggLine(k){const[a,b]=k.split("x").map(Number);if(a!==L.dan)return;
- L.eq=`${a} × ${b} = ${a*b}`;L.yo=Y[a][b-1];L.earn=(L.earn||0)+songCoin(1);
+ L.eq=`${a} × ${b} = ${a*b}`;L.yo=Y[a][b-1];L.earn=(L.earn||0)+songCoin(3);
  BABY.style.setProperty("--dd",-(((L.cur-.489)%.909+.909)%.909)+"s");
  const[x,y]=ctr(BABY.querySelector(".zHead"));hearts(x,y-20,2,"♪","#8e5cff");drawEggSing()}
 function useHeater(){ctx();if(S.stage!==0){say("もう うまれたよ！");return}if(S.heatEnd){say("いま あたためてるよ");return}
@@ -1214,6 +1224,14 @@ function stopSing(){if(!singAct())return;const e=L.earn||0;stopAudio();bgmDuck=1
 ["click","pointerdown","pointerup","touchstart"].forEach(ev=>document.addEventListener(ev,e=>{if(singAct()&&!e.target.closest("#goSong,#eggSing")){e.stopPropagation();if(ev==="click")e.preventDefault()}},true));
 AU.addEventListener("pause",()=>{if(L&&L.egg){bgmDuck=1;drawEggSing()}});AU.addEventListener("ended",()=>{if(L&&L.egg)finishSing()});
 
+const sleepHour=()=>{const h=new Date().getHours();return h<5};
+function nightLockTick(){const on=sleepHour()&&!!S.sp,el=$("nightLock");if(on){if(el.hidden){stopSing&&singAct()&&stopSing();stopAudio();closeOv();S.asleep=true;save()}
+  const src=curImg();if($("nlPet").getAttribute("src")!==src)$("nlPet").src=src;const d=new Date();$("nlClock").textContent=`いま ${d.getHours()}じ${String(d.getMinutes()).padStart(2,"0")}ふん`}
+ else if(!el.hidden){S.asleep=false;S.lightOff=false;save();drawRoom()}
+ el.hidden=!on}
+setInterval(nightLockTick,5000);
+["click","pointerdown","touchstart"].forEach(ev=>document.addEventListener(ev,e=>{if(!$("nightLock").hidden){e.stopPropagation();if(ev==="click")e.preventDefault()}},true));
+
 /* ========== ループ ========== */
 let tk=0;
 setInterval(()=>{decay(1,false);nightTick();look(BABY);drawNeeds();moodFace();think();needVo();visTick();drawGoal();drawStage();evoCheck();if(++tk%5===0)save()},1000);
@@ -1221,6 +1239,7 @@ addEventListener("visibilitychange",()=>{if(document.hidden)save()});
 {const now=Date.now(),f=Math.min(S.n.food,20),j=Math.min(S.n.joy,20);for(let t=Math.max(S.last,now-3*864e5);t<now;t+=60000){const h=new Date(t).getHours();if(h>=21||h<7)continue;decay(Math.min(60,(now-t)/1000),true)}S.n.food=Math.max(f,S.n.food);S.n.joy=Math.max(j,S.n.joy)}
 drawRoom();
 if(!S.sp)openPick();else if(!S.name){look($("nameBaby"));openOv("nameOv")}
+nightLockTick();
 if(FAST)window.T={get G(){return G},get S(){return S},get AU(){return AU},get L(){return L},drawRoom:()=>drawRoom(),save:()=>save()};
 }
 </script>
